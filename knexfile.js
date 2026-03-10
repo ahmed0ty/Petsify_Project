@@ -27,6 +27,9 @@ module.exports = {
       password: process.env.PASSWORD,
       database: process.env.DATABASE,
     },
+     ssl: {
+      rejectUnauthorized: false
+    },
     migrations: {
       directory: path.resolve(__dirname, "config/migrations"),
     },
