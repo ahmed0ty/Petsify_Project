@@ -1,0 +1,35 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+"scripts": {
+  "dev": "nodemon server.js",
+  "start": "cross-env NODE_ENV=production knex migrate:latest && node server.js",
+  "migrate_make": "knex migrate:make --knexfile knexfile.js",
+  "migrate_latest": "knex migrate:latest --knexfile knexfile.js",
+  "migrate_rollback": "knex migrate:rollback --knexfile knexfile.js",
+  "seed_make": "knex seed:make --knexfile knexfile.js",
+  "seed_run": "knex seed:run --knexfile knexfile.js"
+},
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "cros": "^1.1.0",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "express-async-handler": "^1.2.0",
+    "express-validator": "^7.3.1",
+    "fs": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.3",
+    "knex": "^3.1.0",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "mysql": "^2.18.1",
+    "nodemailer": "^8.0.1",
+    "nodemon": "^3.1.11",
+    "uuid": "^13.0.0"
+  }
+}
