@@ -6,7 +6,7 @@ require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
  */
 module.exports = {
   development: {
-    client: "mysql",
+    client: "mysql2",
     connection: {
       host: process.env.HOST,
       port: process.env.DATABASE_PORT || 3306,
@@ -19,7 +19,7 @@ module.exports = {
     },
   },
   production: {
-    client: "mysql",
+    client: "mysql2",
     connection: {
       host: process.env.HOST,
       port: process.env.DATABASE_PORT || 3306,
