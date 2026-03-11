@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getAllUseres, signUpParent, updateUser, getUserDetails } = require("../controllers/user_controller");
+const { getAllUseres, signUpParent, updateUser, getUserDetails, deleteUser } = require("../controllers/user_controller");
 const { uploadImage } = require("../middlewares/imageMiddleware");
 
 const { signUpUserValidator, updateUserValidator } = require("../utils/validator/user_validator");
