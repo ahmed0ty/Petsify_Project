@@ -5,10 +5,10 @@ exports.sendEmail = async (options) => {
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
-      secure: false, // STARTTLS على port 587
+      secure: false, // STARTTLS
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD, // App Password
+        pass: process.env.EMAIL_PASSWORD,
       },
     });
 
@@ -20,7 +20,7 @@ exports.sendEmail = async (options) => {
     };
 
     await transporter.sendMail(mailOpts);
-    console.log("Email sent successfully to:", options.email);
+    console.log("Email sent successfully:", options.email);
   } catch (error) {
     console.log("Failed to send email:", error);
   }
