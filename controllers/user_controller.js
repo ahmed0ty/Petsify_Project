@@ -1,19 +1,19 @@
 const userModel = require("../models/user_model");
 const asyncHandler = require("express-async-handler");
 const ErrorAPI = require("../utils/ErrorAppi");
-const { sendEmail } = require('../utils/sendEmail');
-const { htmlMessage } = require('../utils/messageEmail');
-const bcrypt = require('bcryptjs');
+const { sendEmail } = require("../utils/sendEmail");
+const { htmlMessage } = require("../utils/messageEmail");
+const bcrypt = require("bcryptjs");
 const { generateAccessToken } = require("../utils/generate_Token");
 const sitterModel = require("../models/sitter_model");
 const clinicModel = require("../models/clinic_model");
 const sellerModel = require("../models/seller_model");
 const {
-    createOne,
-    deleteOne,
-    updateOne,
-    getOne,
-    getAll,
+  createOne,
+  deleteOne,
+  updateOne,
+  getOne,
+  getAll,
 } = require("./factory_handler");
 
 const createUser = createOne(userModel, "User");
@@ -23,119 +23,122 @@ const getUserById = getOne(userModel, "User");
 const getAllUseres = getAll(userModel, "User");
 
 const getLoggedUserData = (req, res, next) => {
-    req.params.id = req.user.id;
-    next();
+  req.params.id = req.user.id;
+  next();
 };
 
 const getUserDetails = asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-    const user = await userModel.getById(id);
-    if (!user) {
-        return next(new ErrorAPI("User not found", 404));
+  const { id } = req.params;
+  const user = await userModel.getById(id);
+  if (!user) {
+    return next(new ErrorAPI("User not found", 404));
+  }
+
+  const role = user.role;
+  const responseData = {
+    userId: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    picture: user.picture,
+    isActive: user.isActive,
+  };
+
+  if (role === "sitter") {
+    const data = await sitterModel.getSitterDetails(id);
+    if (data) {
+      responseData.proofOfExperience = data.proofOfExperience;
+      responseData.sitterId = data.id;
+      responseData.location = data.location;
     }
-
-    const role = user.role;
-    const responseData = {
-        userId: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        picture: user.picture,
-        isActive: user.isActive,
-    };
-
-    if (role === "sitter") {
-        const data = await sitterModel.getSitterDetails(id);
-        if (data) {
-            responseData.proofOfExperience = data.proofOfExperience;
-            responseData.sitterId = data.id;
-            responseData.location = data.location;
-        }
-    } else if (role === "seller") {
-        const data = await sellerModel.getSellerDetails(id);
-        if (data) {
-            responseData.proofOfBusiness = data.proofOfBusiness;
-            responseData.sellerId = data.id;
-        }
-    } else if (role === "clinic") {
-        const data = await clinicModel.getClinicDetails(id);
-        if (data) {
-            responseData.professionalLicense = data.professionalLicense;
-            responseData.clinicId = data.id;
-            responseData.location = data.location;
-            responseData.startWorkAt = data.startWorkAt;
-            responseData.finishWorkAt = data.finishWorkAt;
-        }
+  } else if (role === "seller") {
+    const data = await sellerModel.getSellerDetails(id);
+    if (data) {
+      responseData.proofOfBusiness = data.proofOfBusiness;
+      responseData.sellerId = data.id;
     }
+  } else if (role === "clinic") {
+    const data = await clinicModel.getClinicDetails(id);
+    if (data) {
+      responseData.professionalLicense = data.professionalLicense;
+      responseData.clinicId = data.id;
+      responseData.location = data.location;
+      responseData.startWorkAt = data.startWorkAt;
+      responseData.finishWorkAt = data.finishWorkAt;
+    }
+  }
 
-    res.status(200).json({
-        status: "success",
-        data: responseData,
-    });
+  res.status(200).json({
+    status: "success",
+    data: responseData,
+  });
 });
 
-
 const signUpParent = async (req, res, next) => {
-    const verifyCode = Math.floor(10000 + Math.random() * 90000);
-    try {
-        // const data = req.body // القديم
-        const data = req.body; // الجديد: ناخد نسخة من req.body
-        const { confirmPassword } = data; // الجديد: ناخد confirmPassword للتحقق
+  const verifyCode = Math.floor(10000 + Math.random() * 90000);
+  try {
+    // const data = req.body // القديم
+    const data = req.body; // الجديد: ناخد نسخة من req.body
+    const { confirmPassword } = data; // الجديد: ناخد confirmPassword للتحقق
 
-        // ✅ التحقق من تطابق الباسورد
-        if (data.password !== confirmPassword) {
-            return next(new ErrorAPI("Passwords do not match", 400));
-        }
-
-        // ✅ إزالة confirmPassword قبل الحفظ
-        delete data.confirmPassword;
-
-        // ✅ تشفير الباسورد
-        const sharedSalt = await bcrypt.genSalt(8);
-        data.password = await bcrypt.hash(data.password, sharedSalt);
-
-        // ✅ تعيين verifyCode و isActive و role افتراضي
-        data.verifyCode = verifyCode;
-        data.isActive = 1;
-        data.role = data.role || "parent"; // افتراضي لو المستخدم مش دخل role
-
-        // ✅ التعامل مع الصورة لو موجودة
-        if (req.file) {
-            data.picture = req.file.filename;
-        }
-
-        // ✅ إنشاء المستخدم في قاعدة البيانات
-        const newUser = await userModel.create(data);
-
-        // ✅ التحقق بعد الإنشاء وإرسال الإيميل
-        if (!newUser) {
-            return next(new ErrorAPI(`Failed to create user`, 401));
-        }
-        if (newUser[0]) {
-            await sendEmail({
-                email: data.email, // استخدمنا data بدل req.body
-                subject: "verification code",
-                html: htmlMessage(data.fullName, data.verifyCode) // استخدمنا data بدل req.body
-            });
-            return res.status(201).json({
-                status: "success",
-                message: "Parent account created successfully",
-            });
-        }
-    } catch (error) {
-        return next(new ErrorAPI(error, 400));
+    // ✅ التحقق من تطابق الباسورد
+    if (data.password !== confirmPassword) {
+      return next(new ErrorAPI("Passwords do not match", 400));
     }
-}
 
+    // ✅ إزالة confirmPassword قبل الحفظ
+    delete data.confirmPassword;
+
+    // ✅ تشفير الباسورد
+    const sharedSalt = await bcrypt.genSalt(8);
+    data.password = await bcrypt.hash(data.password, sharedSalt);
+
+    // ✅ تعيين verifyCode و isActive و role افتراضي
+    data.verifyCode = verifyCode;
+    data.isActive = 1;
+    // القديم
+    data.role = data.role || "parent";
+
+    // الجديد (اضافة force)
+    if (!data.role) {
+      data.role = "parent";
+    }
+    // ✅ التعامل مع الصورة لو موجودة
+    if (req.file) {
+      data.picture = req.file.filename;
+    }
+
+    // ✅ إنشاء المستخدم في قاعدة البيانات
+    const newUser = await userModel.create(data);
+
+    // ✅ التحقق بعد الإنشاء وإرسال الإيميل
+    if (!newUser) {
+      return next(new ErrorAPI(`Failed to create user`, 401));
+    }
+    if (newUser[0]) {
+      await sendEmail({
+        email: data.email, // استخدمنا data بدل req.body
+        subject: "verification code",
+        html: htmlMessage(data.fullName, data.verifyCode), // استخدمنا data بدل req.body
+      });
+      return res.status(201).json({
+        status: "success",
+        message: "Parent account created successfully",
+      });
+    }
+  } catch (error) {
+    return next(new ErrorAPI(error, 400));
+  }
+};
 
 module.exports = {
-    getAllUseres,
-    getUserById,
-    getUserDetails,
-    updateUser,
-    createUser,
-    deleteUser,
-    signUpParent,
-    getLoggedUserData,
-}
+  getAllUseres,
+  getUserById,
+  getUserDetails,
+  updateUser,
+  createUser,
+  deleteUser,
+  signUpParent,
+  getLoggedUserData,
+};
