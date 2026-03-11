@@ -1,10 +1,10 @@
 const userModel = require("../models/user_model");
 const asyncHandler = require("express-async-handler");
 const ErrorAPI = require("../utils/ErrorAppi");
-const { sendEmail } = require('../utils/sendEmail')
-const { htmlMessage } = require('../utils/messageEmail')
+const { sendEmail } = require('../utils/sendEmail');
+const { htmlMessage } = require('../utils/messageEmail');
 const bcrypt = require('bcryptjs');
-const { generateAccessToken } = require("../utils/generate_Token")
+const { generateAccessToken } = require("../utils/generate_Token");
 const sitterModel = require("../models/sitter_model");
 const clinicModel = require("../models/clinic_model");
 const sellerModel = require("../models/seller_model");
@@ -79,37 +79,54 @@ const getUserDetails = asyncHandler(async (req, res, next) => {
 const signUpParent = async (req, res, next) => {
     const verifyCode = Math.floor(10000 + Math.random() * 90000);
     try {
-        const data = req.body
+        // const data = req.body // القديم
+        const data = req.body; // الجديد: ناخد نسخة من req.body
+        const { confirmPassword } = data; // الجديد: ناخد confirmPassword للتحقق
+
+        // ✅ التحقق من تطابق الباسورد
+        if (data.password !== confirmPassword) {
+            return next(new ErrorAPI("Passwords do not match", 400));
+        }
+
+        // ✅ إزالة confirmPassword قبل الحفظ
+        delete data.confirmPassword;
+
+        // ✅ تشفير الباسورد
         const sharedSalt = await bcrypt.genSalt(8);
-        const hashedPassword = await bcrypt.hash(req.body.password, sharedSalt);
-        req.body.password = hashedPassword,
-            req.body.verifyCode = verifyCode;
+        data.password = await bcrypt.hash(data.password, sharedSalt);
+
+        // ✅ تعيين verifyCode و isActive و role افتراضي
+        data.verifyCode = verifyCode;
+        data.isActive = 1;
+        data.role = data.role || "parent"; // افتراضي لو المستخدم مش دخل role
+
+        // ✅ التعامل مع الصورة لو موجودة
         if (req.file) {
             data.picture = req.file.filename;
         }
-        data.isActive = 1
+
+        // ✅ إنشاء المستخدم في قاعدة البيانات
         const newUser = await userModel.create(data);
 
+        // ✅ التحقق بعد الإنشاء وإرسال الإيميل
         if (!newUser) {
-            return next(new ErrorAPI(`Failed to create ${modelName}`, 401));
+            return next(new ErrorAPI(`Failed to create user`, 401));
         }
         if (newUser[0]) {
             await sendEmail({
-                email: req.body.email,
+                email: data.email, // استخدمنا data بدل req.body
                 subject: "verification code",
-                html: htmlMessage(req.body.fullName, req.body.verifyCode)
-            })
+                html: htmlMessage(data.fullName, data.verifyCode) // استخدمنا data بدل req.body
+            });
             return res.status(201).json({
                 status: "success",
                 message: "Parent account created successfully",
-            })
+            });
         }
     } catch (error) {
-        return next(new ErrorAPI(error, 400))
+        return next(new ErrorAPI(error, 400));
     }
 }
-
-
 
 
 module.exports = {
