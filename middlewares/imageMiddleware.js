@@ -13,7 +13,7 @@ let uuidv4;
 exports.uploadImage = (folderName) => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      const uploadPath = path.join(__dirname, "..", "Uploads", folderName);
+      const uploadPath = path.join(__dirname, "..", "uploads", folderName);
       cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
