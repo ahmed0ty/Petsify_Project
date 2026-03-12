@@ -23,12 +23,10 @@ module.exports = {
       user: process.env.USER,
       password: process.env.PASSWORD,
       database: process.env.DATABASE,
-      ssl: process.env.DB_CA_CERT
-        ? {
-            rejectUnauthorized: true,
-            ca: process.env.DB_CA_CERT,
-          }
-        : { rejectUnauthorized: false }, // fallback لو ما عندكش CA
+      ssl: {
+        // مهم جدًا للاتصال بـ Aiven من Render
+        rejectUnauthorized: false,
+      },
     },
     migrations: {
       directory: path.resolve(__dirname, "config/migrations"),
