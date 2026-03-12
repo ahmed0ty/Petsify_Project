@@ -1,31 +1,18 @@
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 exports.sendEmail = async (options) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST, // smtp-relay.brevo.com
-      port: Number(process.env.EMAIL_PORT) || 587,
-      secure: false, // STARTTLS
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-      tls: {
-        ciphers: "SSLv3", // ضروري أحيانًا للـ STARTTLS
-        rejectUnauthorized: false,
-      },
-    });
-
-    const mailOpts = {
-      from: `"Petsify App" <${process.env.EMAIL_USER}>`,
-      to: options.email,
+    const msg = {
+      to: options.email,            // المستلم
+      from: process.env.EMAIL_USER, // البريد Verified على SendGrid
       subject: options.subject,
       html: options.html,
     };
 
-    await transporter.sendMail(mailOpts);
-    console.log("✅ Email sent successfully:", options.email);
+    await sgMail.send(msg);
+    console.log("✅ Email sent successfully to:", options.email);
   } catch (error) {
-    console.error("❌ Failed to send email:", error);
+    console.error("❌ Failed to send email:", error.response?.body || error);
   }
 };
