@@ -24,7 +24,7 @@ module.exports = {
       password: process.env.PASSWORD,
       database: process.env.DATABASE,
       ssl: {
-        // مهم جدًا للاتصال بـ Aiven من Render
+       
         rejectUnauthorized: false,
       },
     },

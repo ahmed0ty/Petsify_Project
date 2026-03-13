@@ -10,7 +10,7 @@ router.get("/:id", getUserDetails);
 router.put("/:id", uploadImage("user").single("picture"), updateUserValidator, updateUser)
 
 
-// ✅ إضافة مسار DELETE
+
 router.delete("/:id", deleteUser);
 
 
