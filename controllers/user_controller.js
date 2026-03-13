@@ -149,11 +149,11 @@ const signUpParent = async (req, res, next) => {
         });
 
    
-        sendEmail({
-            email: data.email,
-            subject: "Verification Code",
-            html: htmlMessage(data.fullName, data.verifyCode)
-        }).catch(err => console.log("Email sending failed:", err));
+     sendEmail({
+  email: data.email,
+  name: data.fullName,
+  otp: verifyCode
+}).catch(err => console.log(err));
 
     } catch (error) {
         return next(new ErrorAPI(error, 400));
