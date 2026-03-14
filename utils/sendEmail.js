@@ -1,24 +1,26 @@
-require("dotenv").config();
 const sgMail = require("@sendgrid/mail");
+
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-exports.sendEmail = (options) => {
+exports.sendEmail = async ({ email, name, otp }) => {
+  try {
 
-  const msg = {
-    to: options.email,
-    from: {
-      email: process.env.EMAIL_USER,
-      name: "Petsify"
-    },
-    subject: options.subject,
-    html: options.html,
-  };
+    const msg = {
+      to: email,
+      from: process.env.EMAIL_USER,
+      templateId: process.env.SENDGRID_TEMPLATE_ID,
 
-  sgMail.send(msg)
-    .then(() => {
-      console.log("Email sent");
-    })
-    .catch(err => {
-      console.error("Email error:", err.response?.body || err);
-    });
+      dynamicTemplateData: {
+        name: name,
+        otp: otp
+      }
+    };
+
+    await sgMail.send(msg);
+
+    console.log("Email sent to:", email);
+
+  } catch (error) {
+    console.error("Email error:", error.response?.body || error.message);
+  }
 };

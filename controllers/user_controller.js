@@ -8,7 +8,6 @@ const { generateAccessToken } = require("../utils/generate_Token");
 const sitterModel = require("../models/sitter_model");
 const clinicModel = require("../models/clinic_model");
 const sellerModel = require("../models/seller_model");
-const emailQueue = require("../utils/emailQueue");
 const {
   createOne,
   deleteOne,
@@ -149,8 +148,8 @@ const signUpParent = async (req, res, next) => {
             userId: newUser[0].id
         });
 
-
- emailQueue.add({
+   
+sendEmail({
   email: data.email,
   subject: "Verification Code",
   html: htmlMessage(data.fullName, data.verifyCode)
