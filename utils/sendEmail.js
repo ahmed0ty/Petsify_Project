@@ -1,26 +1,18 @@
 const sgMail = require("@sendgrid/mail");
-
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-exports.sendEmail = async ({ email, name, otp }) => {
+exports.sendEmail = async (options) => {
   try {
-
     const msg = {
-      to: email,
+      to: options.email,        
       from: process.env.EMAIL_USER,
-      templateId: process.env.SENDGRID_TEMPLATE_ID,
-
-      dynamicTemplateData: {
-        name: name,
-        otp: otp
-      }
+      subject: options.subject,
+      html: options.html,
     };
 
     await sgMail.send(msg);
-
-    console.log("Email sent to:", email);
-
+    console.log("✅ Email sent successfully to:", options.email);
   } catch (error) {
-    console.error("Email error:", error.response?.body || error.message);
+    console.error("❌ Failed to send email:", error.response?.body || error);
   }
 };
