@@ -200,7 +200,7 @@ session = ort.InferenceSession(MODEL_PATH)
 input_name = session.get_inputs()[0].name
 print("Model loaded successfully!")
 
-classes = ['Dermatitis','Fungal_infections','Healthy','Hypersensitivity','demodicosis','ringworm']
+classes = ['demodicosis','Dermatitis','Fungal_infections','Healthy','Hypersensitivity','ringworm']
 
 treatments = {
     "demodicosis": "Apply medicated shampoo, consult vet for topical/oral antibiotics.",
