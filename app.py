@@ -186,32 +186,22 @@
 
 
 
-
-
 from flask import Flask, request, jsonify
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
+import onnxruntime as ort
 import numpy as np
+from PIL import Image
+import io
 import os
 
 app = Flask(__name__)
 
-# --------------------------
-# تحميل الموديل
-# --------------------------
-MODEL_PATH = "dog_skin_model_fast.h5"
-
-model = load_model(MODEL_PATH)
+MODEL_PATH = "dog_skin_model.onnx"
+session = ort.InferenceSession(MODEL_PATH)
+input_name = session.get_inputs()[0].name
 print("Model loaded successfully!")
 
-# --------------------------
-# ترتيب الكلاسات (مهم جدًا)
-# --------------------------
 classes = ['Dermatitis','Fungal_infections','Healthy','Hypersensitivity','demodicosis','ringworm']
 
-# --------------------------
-# العلاجات
-# --------------------------
 treatments = {
     "demodicosis": "Apply medicated shampoo, consult vet for topical/oral antibiotics.",
     "Dermatitis": "Use anti-inflammatory ointments, check for allergens in food/environment.",
@@ -221,9 +211,6 @@ treatments = {
     "ringworm": "Use antifungal ointments/shampoos, isolate affected dog, consult vet."
 }
 
-# --------------------------
-# API
-# --------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
@@ -235,21 +222,17 @@ def predict():
         if file.filename == "":
             return jsonify({"error": "Empty file name"}), 400
 
-        filepath = "temp.jpg"
-        file.save(filepath)
-
-        img = image.load_img(filepath, target_size=(224, 224))
-        img_array = image.img_to_array(img)
+        img = Image.open(io.BytesIO(file.read())).convert("RGB")
+        img = img.resize((224, 224))
+        img_array = np.array(img).astype(np.float32)
         img_array = np.expand_dims(img_array, axis=0)
         img_array /= 255.0
 
-        preds = model.predict(img_array, verbose=0)[0]
+        preds = session.run(None, {input_name: img_array})[0][0]
 
         top_index = np.argmax(preds)
         result = classes[top_index]
         confidence = float(preds[top_index])
-
-        os.remove(filepath)
 
         return jsonify({
             "prediction": result,
@@ -260,10 +243,6 @@ def predict():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-# --------------------------
-# تشغيل السيرفر
-# --------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
