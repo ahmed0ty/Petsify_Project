@@ -7,6 +7,7 @@ const ErrorAPI = require("./utils/ErrorAppi");
 const GlobalError = require("./middlewares/globalError");
 require("dotenv").config();
 const mountRoutes = require("./routes/mount_router");
+const communityRoutes = require("./routes/community_routes");
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/v1/community", communityRoutes);
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -28,6 +30,6 @@ app.use((req, res, next) => {
 app.use(GlobalError);
 
 const PORT = process.env.SERVER_PORT || 8000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running on port ${PORT}`);
 });

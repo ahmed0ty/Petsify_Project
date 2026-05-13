@@ -4,13 +4,13 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 from sklearn.metrics import classification_report
 
-MODEL_PATH = r"C:\Users\Ahmed\Desktop\petsfiy-main\DogDiseaseAI\model\dog_skin_model_v2.h5"
+MODEL_PATH = r"G:\All projects\petsfiy-main\DogDiseaseAI\model\dog_skin_model_v2.h5"
 model = load_model(MODEL_PATH)
 print("✅ Model loaded successfully!")
 
 classes = ["demodicosis","Dermatitis","Fungal_infections","Healthy","Hypersensitivity","ringworm"]
 
-TEST_FOLDER = r"C:\Users\Ahmed\Desktop\petsfiy-main\backend\DogDiseaseAI\dataset\val"
+TEST_FOLDER = r"G:\All projects\petsfiy-main\backend\DogDiseaseAI\dataset\val"
 
 y_true = []
 y_pred = []

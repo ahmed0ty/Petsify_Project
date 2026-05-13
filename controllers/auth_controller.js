@@ -80,7 +80,7 @@ const verifyCode = async (req, res, next) => {
     if (!user) {
         return next(new ErrorAPI("incorrect credential email or verify code", 400))
     }
-    const update = await userModel.update(user.id, { emailIsVerified: 1 })
+const update = await userModel.update(user.id, { emailIsVerified: 1, isActive: 1 })
     if (update) {
         user.emailIsVerified = 1
         return res.status(200).json({

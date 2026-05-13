@@ -6,21 +6,18 @@ const {
 } = require("./factory_handler");
 const ErrorAPI = require("../utils/ErrorAppi");
 
-
 const createCart = createOne(cartModel, "Cart");
 const deleteCart = deleteOne(cartModel, "Cart");
 const getAllCarts = getAll(cartModel, "Cart");
 
-
-
 const getCartForUser = async (req, res, next) => {
   try {
-    const result = await cartModel.getCartByUserId(req.params.userId,);
+    const result = await cartModel.getCartByUserId(req.params.userId);
 
     if (!result || result.length === 0) {
       return next(new ErrorAPI("No Cart found", 404));
     }
-    console.log(result)
+
     let products = [];
     let totalAmountAfterDiscount = 0;
     let totalAmountBeforeDiscount = 0;
@@ -30,22 +27,21 @@ const getCartForUser = async (req, res, next) => {
       const discount = row.discount ?? 0;
       const product = {
         id: row.productId,
-        cartId : row.id,
+        cartId: row.id,
         created_at: row.created_at,
         name: row.name,
         description: row.description,
         quantity: row.quantity,
-        discount_percentage: discount,
-        price:row.price,
-        total_price_before_discount: row.totalPrice,
-        total_price_after_discount: row.discountedPrice,
+        discount_percentage: parseFloat(discount) || 0,
+        price: parseFloat(row.price) || 0,
+        total_price_before_discount: parseFloat(row.totalPrice) || 0,
+        total_price_after_discount: parseFloat(row.discountedPrice) || parseFloat(row.totalPrice) || 0,
         selling_price: row.selling_price,
-        picture: row.picture
-      
+        picture: row.picture,
       };
       products.push(product);
-      totalAmountBeforeDiscount += row.totalPrice;
-      totalAmountAfterDiscount += row.discountedPrice;
+      totalAmountBeforeDiscount += parseFloat(row.totalPrice) || 0;
+      totalAmountAfterDiscount += parseFloat(row.discountedPrice) || parseFloat(row.totalPrice) || 0;
     }
 
     return res.status(200).json({
@@ -59,52 +55,50 @@ const getCartForUser = async (req, res, next) => {
   }
 };
 
-
-const incrementNumberOfProduct = async (req,res,next)=>{
-  try{
-    const cart = await cartModel.getById(req.body.cartId)
-    if(cart.orderId !== null){
-      return next(new ErrorAPI("This cart has already been checked out. You can’t modify the items.", 404));
+const incrementNumberOfProduct = async (req, res, next) => {
+  try {
+    const cart = await cartModel.getById(req.body.cartId);
+    if (cart.orderId !== null) {
+      return next(new ErrorAPI("This cart has already been checked out. You can't modify the items.", 404));
     }
-    const newQuantity = cart.quantity + 1
-    const updateQuantity = await cartModel.update(cart.id, {"quantity":newQuantity})
-    if(!updateQuantity){
+    const newQuantity = cart.quantity + 1;
+    const updateQuantity = await cartModel.update(cart.id, { quantity: newQuantity });
+    if (!updateQuantity) {
       return next(new ErrorAPI("Error updating quantity", 404));
     }
     return res.status(200).json({
-      status:"success",
-      message : "Quanitiy of product as updated",
-      newQuantity
-    })
-  }catch(err){
-    next(err)
+      status: "success",
+      message: "Quantity of product was updated",
+      newQuantity,
+    });
+  } catch (err) {
+    next(err);
   }
-}
+};
 
-
-const decrementNumberOfProduct = async (req,res,next)=>{
-   try{
-    const cart = await cartModel.getById(req.body.cartId)
-    if(cart.orderId !== null){
-      return next(new ErrorAPI("This cart has already been checked out. You can’t modify the items.", 404));
+const decrementNumberOfProduct = async (req, res, next) => {
+  try {
+    const cart = await cartModel.getById(req.body.cartId);
+    if (cart.orderId !== null) {
+      return next(new ErrorAPI("This cart has already been checked out. You can't modify the items.", 404));
     }
-    const newQuantity = cart.quantity - 1
-    if(newQuantity <= 0){
+    const newQuantity = cart.quantity - 1;
+    if (newQuantity <= 0) {
       return next(new ErrorAPI("Error updating quantity", 404));
     }
-    const updateQuantity = await cartModel.update(cart.id, {"quantity":newQuantity})
-    if(!updateQuantity){
+    const updateQuantity = await cartModel.update(cart.id, { quantity: newQuantity });
+    if (!updateQuantity) {
       return next(new ErrorAPI("Error updating quantity", 404));
     }
     return res.status(200).json({
-      status:"success",
-      message : "Quanitiy of product as updated",
-      newQuantity
-    })
-  }catch(err){
-    next(err)
+      status: "success",
+      message: "Quantity of product was updated",
+      newQuantity,
+    });
+  } catch (err) {
+    next(err);
   }
-}
+};
 
 module.exports = {
   createCart,

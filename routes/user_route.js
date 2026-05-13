@@ -6,7 +6,7 @@ const { uploadImage } = require("../middlewares/imageMiddleware");
 const { signUpUserValidator, updateUserValidator } = require("../utils/validator/user_validator");
 
 router.route("/").post(uploadImage("user").single("picture"), signUpUserValidator, signUpParent).get(getAllUseres);
-router.get("/:id", getUserDetails);
+router.get("/:id/details", getUserDetails);
 router.put("/:id", uploadImage("user").single("picture"), updateUserValidator, updateUser)
 
 

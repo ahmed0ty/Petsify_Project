@@ -116,6 +116,8 @@ const getUserDetails = asyncHandler(async (req, res, next) => {
 const signUpParent = async (req, res, next) => {
     try {
         const verifyCode = Math.floor(10000 + Math.random() * 90000);
+        console.log("✅ Verify Code for", req.body.email, ":", verifyCode); // ضيف السطر ده
+
         const data = req.body;
         const { confirmPassword } = data;
 
