@@ -1,24 +1,16 @@
 const multer = require("multer");
-const fs = require("fs");
-const path = require("path");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 const ErrorAPI = require("../utils/ErrorAppi");
 
-let uuidv4;
-
-(async () => {
-  const uuid = await import("uuid");
-  uuidv4 = uuid.v4;
-})();
-
 exports.uploadImage = (folderName) => {
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      const uploadPath = path.join(__dirname, "..", "uploads", folderName);
-      cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-      cb(null, uuidv4() + path.extname(file.originalname));
-    },
+  const storage = new CloudinaryStorage({
+    cloudinary,
+    params: (req, file) => ({
+      folder: `uploads/${folderName}`,
+      public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
+      allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    }),
   });
 
   const fileFilter = (req, file, cb) => {
@@ -36,25 +28,12 @@ exports.uploadImage = (folderName) => {
   });
 };
 
-exports.removeImage = (filename,imageName) => {
-  return new Promise((resolve, reject) => {
-    if (!filename) {
-      return resolve({ message: "Picture not found" });
-    }
-    fs.unlink(`uploads/${filename}/${imageName}`, (err) => {
-      if (err) {
-        return reject({ message: "Error deleting file", error: err });
-      } else {
-        return resolve({
-          message: "File deleted successfully",
-          filepath: filename,
-        });
-      }
-    });
-  });
+exports.removeImage = async (publicId) => {
+  try {
+    if (!publicId) return { message: "No image to delete" };
+    await cloudinary.uploader.destroy(publicId);
+    return { message: "File deleted successfully" };
+  } catch (err) {
+    throw { message: "Error deleting file", error: err };
+  }
 };
-
-
-
-
-
