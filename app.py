@@ -74,7 +74,6 @@
 
 
 
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import onnxruntime as ort
@@ -82,7 +81,6 @@ import numpy as np
 from PIL import Image
 import io
 import os
-import tensorflow as tf
 
 app = Flask(__name__)
 CORS(app)
@@ -93,13 +91,12 @@ session = ort.InferenceSession(MODEL_PATH)
 input_name = session.get_inputs()[0].name
 print("Disease model loaded successfully!")
 
-# Dog Detector Model (MobileNetV2 من ImageNet)
-dog_detector = tf.keras.applications.MobileNetV2(
-    weights='imagenet', include_top=True
-)
+# Dog Detector Model (MobileNetV2 ONNX)
+DOG_MODEL_PATH = "mobilenet_v2.onnx"
+dog_session = ort.InferenceSession(DOG_MODEL_PATH)
+dog_input_name = dog_session.get_inputs()[0].name
 print("Dog detector loaded successfully!")
 
-# Dog class indices في ImageNet (151 لـ 268 كلها كلاب)
 DOG_CLASS_RANGE = range(151, 269)
 
 classes = ['demodicosis','Dermatitis','Fungal_infections','Healthy','Hypersensitivity','ringworm']
@@ -115,10 +112,11 @@ treatments = {
 
 def is_dog(img: Image.Image) -> bool:
     img_resized = img.resize((224, 224))
-    img_array = tf.keras.preprocessing.image.img_to_array(img_resized)
-    img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
+    img_array = np.array(img_resized).astype(np.float32)
+    img_array = (img_array / 127.5) - 1.0
     img_array = np.expand_dims(img_array, axis=0)
-    preds = dog_detector.predict(img_array, verbose=0)
+
+    preds = dog_session.run(None, {dog_input_name: img_array})[0]
     top_indices = np.argsort(preds[0])[::-1][:5]
     for idx in top_indices:
         if idx in DOG_CLASS_RANGE:
@@ -137,7 +135,6 @@ def predict():
 
         img = Image.open(io.BytesIO(file.read())).convert("RGB")
 
-        # تحقق إن الصورة كلب
         if not is_dog(img):
             return jsonify({
                 "prediction": "Not a dog",
@@ -145,7 +142,6 @@ def predict():
                 "treatment": "This image does not appear to be a dog. Please upload a clear image of a dog."
             })
 
-        # تحليل المرض
         img_resized = img.resize((224, 224))
         img_array = np.array(img_resized).astype(np.float32)
         img_array = np.expand_dims(img_array, axis=0)

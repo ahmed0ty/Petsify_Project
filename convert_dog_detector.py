@@ -1,7 +1,6 @@
 import tensorflow as tf
 import tf2onnx
 
-# تحميل موديل MobileNetV2 بأوزان imagenet
 model = tf.keras.applications.MobileNetV2(weights='imagenet', include_top=True)
 
 tf2onnx.convert.from_keras(
