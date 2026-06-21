@@ -80,18 +80,13 @@ const confirmOrder = async(req,res,next)=>{
   }
 }
 
-  const orderDetails = async (req, res, next) => {
+const orderDetails = async (req, res, next) => {
   try {
     const result = await orderModel.getOrderDetails(req.params.id);
-   if (!result || result.length === 0) {
+
+    if (!result || result.length === 0) {
       return next(new ErrorAPI("No Order found", 404));
     }
-  } catch (err) {
-    console.error("❌ orderDetails error:", err);
-    next(err);
-  }
-}
-
 
     let totalAmountAfterDiscount = 0;
     let totalAmountBeforeDiscount = 0;
@@ -142,6 +137,7 @@ const confirmOrder = async(req,res,next)=>{
       data: data,
     });
   } catch (err) {
+    console.error("❌ orderDetails error:", err);
     next(err);
   }
 }
