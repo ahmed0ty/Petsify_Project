@@ -30,9 +30,11 @@ const signUpSitter = async (req, res, next) => {
             req.body.verifyCode = verifyCode;
 
         if (req.files) {
-            req.body.proofOfExperience = req.files.proofOfExperience?.[0]?.filename;
-            req.body.picture = req.files.picture?.[0]?.filename;
-        }
+    const expFile = req.files.proofOfExperience?.[0];
+    const pictureFile = req.files.picture?.[0];
+    req.body.proofOfExperience = expFile?.path?.startsWith("http") ? expFile.path : expFile?.filename;
+    req.body.picture = pictureFile?.path?.startsWith("http") ? pictureFile.path : pictureFile?.filename;
+}
         const userData = {
             fullName: req.body.fullName,
             email: req.body.email,

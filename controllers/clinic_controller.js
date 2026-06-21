@@ -29,10 +29,12 @@ const signUpClinic = async (req, res, next) => {
         req.body.password = hashedPassword,
             req.body.verifyCode = verifyCode;
 
-        if (req.files) {
-            req.body.professionalLicense = req.files.professionalLicense?.[0]?.filename;
-            req.body.picture = req.files.picture?.[0]?.filename;
-        }
+      if (req.files) {
+    const licenseFile = req.files.professionalLicense?.[0];
+    const pictureFile = req.files.picture?.[0];
+    req.body.professionalLicense = licenseFile?.path?.startsWith("http") ? licenseFile.path : licenseFile?.filename;
+    req.body.picture = pictureFile?.path?.startsWith("http") ? pictureFile.path : pictureFile?.filename;
+}
         const userData = {
             fullName: req.body.fullName,
             email: req.body.email,

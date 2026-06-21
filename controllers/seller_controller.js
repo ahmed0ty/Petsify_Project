@@ -30,9 +30,11 @@ const signUpSeller = async (req, res, next) => {
             req.body.verifyCode = verifyCode;
 
         if (req.files) {
-            req.body.proofOfBusiness = req.files.proofOfBusiness?.[0]?.filename;
-            req.body.picture = req.files.picture?.[0]?.filename;
-        }
+    const businessFile = req.files.proofOfBusiness?.[0];
+    const pictureFile = req.files.picture?.[0];
+    req.body.proofOfBusiness = businessFile?.path?.startsWith("http") ? businessFile.path : businessFile?.filename;
+    req.body.picture = pictureFile?.path?.startsWith("http") ? pictureFile.path : pictureFile?.filename;
+}
         const userData = {
             fullName: req.body.fullName,
             email: req.body.email,
