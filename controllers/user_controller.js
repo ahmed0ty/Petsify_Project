@@ -139,6 +139,9 @@ const signUpParent = async (req, res, next) => {
         : req.file.filename;
 }
 
+if (!data.phone || data.phone.trim() === "") {
+    return next(new ErrorAPI("Phone number is required", 400));
+}
         const newUser = await userModel.create(data);
 
         if (!newUser) {
