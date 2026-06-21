@@ -27,13 +27,13 @@ exports.updateUserProfile = asyncHandler(async (req, res, next) => {
         const updateData = { ...req.body };
 
         const userFields = ["fullName", "email", "phone"];
-        const userData = {};
+const userData = {};
 
-        userFields.forEach((field) => {
-            if (updateData[field] !== undefined) {
-                userData[field] = updateData[field];
-            }
-        });
+userFields.forEach((field) => {
+    if (updateData[field] !== undefined && updateData[field] !== "") {
+        userData[field] = updateData[field];
+    }
+});
 
         if (req.file) {
             userData.picture = req.file.path;
