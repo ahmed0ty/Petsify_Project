@@ -6,9 +6,7 @@ const { createProductValidator } = require("../utils/validator/product_validator
 
 router.route("/").get(getAllProducts);
 router.route("/").post(
-  uploadImage("product").fields([
-    { name: "picture", maxCount: 1 },
-  ]),
+  uploadImage("product").fields([{ name: "picture", maxCount: 1 }]),
   createProductValidator,
   createProduct
 );
