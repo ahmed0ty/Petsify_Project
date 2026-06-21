@@ -35,8 +35,10 @@ exports.updateUserProfile = asyncHandler(async (req, res, next) => {
         }
     });
 
-    if (req.file) {
-    userData.picture = req.file.path;
+   if (req.file) {
+    userData.picture = req.file.path?.startsWith("http") 
+        ? req.file.path 
+        : req.file.filename;
 }
 
     // 2) Handle role-specific sub-table updates

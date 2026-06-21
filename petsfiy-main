@@ -1,0 +1,21 @@
+[33mcommit f22c3edb8b1f0b077b3033ca826ce926bbada909[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: ahmed0ty <ahmedabdelbaky2321@gmail.com>
+Date:   Sun Jun 21 05:01:17 2026 +0300
+
+    Fix: use Cloudinary URL (req.file.path) instead of filename for profile picture upload
+
+[1mdiff --git a/controllers/update_profile_controller.js b/controllers/update_profile_controller.js[m
+[1mindex 576f01d..0142128 100644[m
+[1m--- a/controllers/update_profile_controller.js[m
+[1m+++ b/controllers/update_profile_controller.js[m
+[36m@@ -36,8 +36,8 @@[m [mexports.updateUserProfile = asyncHandler(async (req, res, next) => {[m
+     });[m
+ [m
+     if (req.file) {[m
+[31m-        userData.picture = req.file.filename;[m
+[31m-    }[m
+[32m+[m[32m    userData.picture = req.file.path;[m
+[32m+[m[32m}[m
+ [m
+     // 2) Handle role-specific sub-table updates[m
+     // Note: Proof files (proofOfExperience, professionalLicense, proofOfBusiness) [m
