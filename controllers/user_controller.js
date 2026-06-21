@@ -134,8 +134,10 @@ const signUpParent = async (req, res, next) => {
         data.verifyCode = verifyCode;
         data.isActive = 1;
         if (req.file) {
-            data.picture = req.file.filename;
-        }
+    data.picture = req.file.path?.startsWith("http") 
+        ? req.file.path 
+        : req.file.filename;
+}
 
         const newUser = await userModel.create(data);
 
