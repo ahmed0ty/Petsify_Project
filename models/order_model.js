@@ -5,8 +5,11 @@ class orderModel extends BaseModel {
     super("order");
   }
   async getOrdersForseller(sellerId) {
-    return await db("pending_order_items").select("*").where({sellerId}).groupBy("orderId").orderBy("order_created_at", "desc");
-  }
+    return await db("pending_order_items")
+      .select("*")
+      .where({ sellerId })
+      .orderBy("order_created_at", "desc");
+}
 
   async getOrderDetails(orderId) {
     return await db("pending_order_items").select("*").where({"order_id": orderId}) 
