@@ -2,22 +2,9 @@ const express = require("express");
 const router = express.Router();
 const ctrl = require("../controllers/community_controller");
 const { verifyToken } = require("../middlewares/auth_middlware");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { uploadImage } = require("../middlewares/imageMiddleware");
 
-// multer setup for post images
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "uploads/community";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage });
+const upload = uploadImage("community");
 
 // Posts
 router.get("/feed", verifyToken, ctrl.getFeed);

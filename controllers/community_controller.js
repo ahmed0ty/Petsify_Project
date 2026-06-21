@@ -11,7 +11,7 @@ exports.createPost = async (req, res) => {
     console.log("User:", req.user);      // ← وده
     const userId = req.user.id;
     const { content } = req.body;
-    const image = req.file ? req.file.filename : null;
+   const image = req.file ? req.file.path : null;
 
     if (!content) return res.status(400).json({ message: "Content is required" });
 
