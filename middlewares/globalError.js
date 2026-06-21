@@ -1,28 +1,20 @@
 const GlobalError = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || "error";
+  const statusCode = (err && err.statusCode && Number.isInteger(err.statusCode)) ? err.statusCode : 500;
+  const status = err.status || (statusCode >= 400 && statusCode < 500 ? "failed" : "error");
+
   if (process.env.NODE_ENV === "development") {
-    sendErrorForDev(err, res);
+    return res.status(statusCode).json({
+      status,
+      message: err.message,
+      error: err,
+      stack: err.stack,
+    });
   } else {
-    sendErrorForProd(err, res);
+    return res.status(statusCode).json({
+      status,
+      message: err.message || "Something went wrong",
+    });
   }
-};
-
-const sendErrorForDev = (err, res) => {
-  return res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack,
-  });
-};
-
-const sendErrorForProd = (err, res) => {
-  const statusCode = Number.isInteger(err.statusCode) ? err.statusCode : 500;
-  return res.status(statusCode).json({
-    status: err.status || "error",
-    message: err.message || "Something went wrong",
-  });
 };
 
 module.exports = GlobalError;
