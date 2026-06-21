@@ -4,13 +4,20 @@ const asyncHandler = require("express-async-handler");
 exports.createOne = (model, modelName) => {
   return asyncHandler(async (req, res, next) => {
     if (req.file) {
-      req.body.picture = req.file.path; // Cloudinary URL كامل
+      req.body.picture = req.file.path.startsWith("http") 
+        ? req.file.path 
+        : req.file.filename;
     }
     if (req.files) {
       if(req.files.healthCertificate) {
-        req.body.healthCertificate = req.files.healthCertificate?.[0]?.filename;
+        req.body.healthCertificate = req.files.healthCertificate?.[0]?.path || req.files.healthCertificate?.[0]?.filename;
       }
-      req.body.picture = req.files.picture?.[0]?.filename;
+      const pictureFile = req.files.picture?.[0];
+      if (pictureFile) {
+        req.body.picture = pictureFile.path?.startsWith("http") 
+          ? pictureFile.path 
+          : pictureFile.filename;
+      }
     }
     const result = await model.create(req.body);
     if (!result) {
@@ -55,7 +62,9 @@ exports.getOne = (model, modelName, idParam = "id") => {
 exports.updateOne = (model, modelName, idParam = "id") => {
   return asyncHandler(async (req, res, next) => {
     if (req.file) {
-      req.body.picture = req.file.filename;
+      req.body.picture = req.file.path?.startsWith("http") 
+        ? req.file.path 
+        : req.file.filename;
     }
     const result = await model.update(req.params[idParam], req.body);
     if (!result) {
