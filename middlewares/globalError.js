@@ -16,10 +16,12 @@ const sendErrorForDev = (err, res) => {
     stack: err.stack,
   });
 };
+
 const sendErrorForProd = (err, res) => {
-  return res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
+  const statusCode = Number.isInteger(err.statusCode) ? err.statusCode : 500;
+  return res.status(statusCode).json({
+    status: err.status || "error",
+    message: err.message || "Something went wrong",
   });
 };
 
