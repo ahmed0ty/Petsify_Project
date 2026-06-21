@@ -12,9 +12,8 @@ class orderModel extends BaseModel {
 }
 
   async getOrderDetails(orderId) {
-    return await db("pending_order_items").select("*").where({"order_id": orderId}) 
-    
-  }
+    return await db("pending_order_items").select("*").where({"orderId": orderId}) 
+}
   
 }
 module.exports = new orderModel();
