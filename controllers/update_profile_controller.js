@@ -36,8 +36,8 @@ exports.updateUserProfile = asyncHandler(async (req, res, next) => {
     });
 
     if (req.file) {
-        userData.picture = req.file.filename;
-    }
+    userData.picture = req.file.path;
+}
 
     // 2) Handle role-specific sub-table updates
     // Note: Proof files (proofOfExperience, professionalLicense, proofOfBusiness) 
