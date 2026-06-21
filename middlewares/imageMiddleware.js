@@ -27,13 +27,3 @@ exports.uploadImage = (folderName) => {
     limits: { fileSize: 5 * 1024 * 1024 },
   });
 };
-
-exports.removeImage = async (publicId) => {
-  try {
-    if (!publicId) return { message: "No image to delete" };
-    await cloudinary.uploader.destroy(publicId);
-    return { message: "File deleted successfully" };
-  } catch (err) {
-    throw { message: "Error deleting file", error: err };
-  }
-};

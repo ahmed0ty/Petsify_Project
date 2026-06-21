@@ -4,7 +4,7 @@ const asyncHandler = require("express-async-handler");
 exports.createOne = (model, modelName) => {
   return asyncHandler(async (req, res, next) => {
     if (req.file) {
-      req.body.picture = req.file.filename;
+      req.body.picture = req.file.path; // Cloudinary URL كامل
     }
     if (req.files) {
       if(req.files.healthCertificate) {
