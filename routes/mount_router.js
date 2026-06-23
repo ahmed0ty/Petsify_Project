@@ -9,5 +9,6 @@ const mountRoutes = (app) => {
   app.use("/api/v1/cart", require("./cart_route"));
   app.use("/api/v1/order", require("./order_route"));
   app.use("/api/v1/community", require("./community_routes"));
+  app.use("/api/v1/booking", require("./booking_route"));
 };
 module.exports = mountRoutes;
