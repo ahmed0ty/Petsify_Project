@@ -13,9 +13,9 @@ const deleteBooking = deleteOne(bookingModel, "Booking");
 
 const updateBookingStatus = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { status } = req.body; // "confirmed" or "rejected"
+  const { status } = req.body;
 
-  if (!["confirmed", "rejected"].includes(status)) {
+  if (!["confirmed", "cancelled"].includes(status)) {
     return res.status(400).json({ message: "Invalid status" });
   }
 
@@ -25,14 +25,6 @@ const updateBookingStatus = asyncHandler(async (req, res, next) => {
   }
 
   await bookingModel.update(id, { status });
-
-  await knex("community_notifications").insert({
-    user_id: booking.parentId,
-    actor_id: booking.clinicId,
-    type: status === "confirmed"
-      ? "booking_accepted"
-      : "booking_rejected",
-  });
 
   res.status(200).json({
     status: "success",
