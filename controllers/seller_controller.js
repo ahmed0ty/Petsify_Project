@@ -43,6 +43,7 @@ const signUpSeller = async (req, res, next) => {
             verifyCode: req.body.verifyCode,
             picture: req.body.picture,
             role: req.body.role,
+            isActive: 0, // ينتظر موافقة الأدمن
         }
         const userId = await userModel.create(userData);
         if (!userId[0]) {

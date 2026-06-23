@@ -35,7 +35,9 @@ const signUpClinic = async (req, res, next) => {
     req.body.professionalLicense = licenseFile?.path?.startsWith("http") ? licenseFile.path : licenseFile?.filename;
     req.body.picture = pictureFile?.path?.startsWith("http") ? pictureFile.path : pictureFile?.filename;
 }
+
         const userData = {
+            
             fullName: req.body.fullName,
             email: req.body.email,
             phone: req.body.phone,
@@ -43,6 +45,7 @@ const signUpClinic = async (req, res, next) => {
             verifyCode: req.body.verifyCode,
             picture: req.body.picture,
             role: req.body.role,
+            isActive: 0, // ينتظر موافقة الأدمن
         }
         const userId = await userModel.create(userData);
         if (!userId[0]) {
