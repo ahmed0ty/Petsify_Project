@@ -1,5 +1,6 @@
 const bookingModel = require("../models/booking_model");
 const asyncHandler = require("express-async-handler");
+const knex = require("../config/db");
 const {
   createOne,
   updateOne,
@@ -9,6 +10,35 @@ const {
 const createBooking = createOne(bookingModel, "Booking");
 const updateBooking = updateOne(bookingModel, "Booking");
 const deleteBooking = deleteOne(bookingModel, "Booking");
+
+const updateBookingStatus = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { status } = req.body; // "confirmed" or "rejected"
+
+  if (!["confirmed", "rejected"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  const booking = await bookingModel.getById(id);
+  if (!booking) {
+    return res.status(404).json({ message: "Booking not found" });
+  }
+
+  await bookingModel.update(id, { status });
+
+  await knex("community_notifications").insert({
+    user_id: booking.parentId,
+    actor_id: booking.clinicId,
+    type: status === "confirmed"
+      ? "booking_accepted"
+      : "booking_rejected",
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: `Booking ${status}`,
+  });
+});
 
 const getClinicBookings = asyncHandler(async (req, res, next) => {
   const { clinicId } = req.params;
@@ -26,6 +56,7 @@ module.exports = {
   createBooking,
   updateBooking,
   deleteBooking,
+  updateBookingStatus,
   getClinicBookings,
   getParentBookings,
 };
