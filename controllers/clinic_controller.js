@@ -29,7 +29,7 @@ const signUpClinic = async (req, res, next) => {
         req.body.password = hashedPassword,
             req.body.verifyCode = verifyCode;
 
-      if (req.files) {
+    if (req.files) {
     const licenseFile = req.files.professionalLicense?.[0];
     const pictureFile = req.files.picture?.[0];
     req.body.professionalLicense = licenseFile?.path?.startsWith("http") ? licenseFile.path : licenseFile?.filename;
